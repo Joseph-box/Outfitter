@@ -38,6 +38,8 @@ local Outfitter_cSlotNames =
 	"Trinket1Slot",
 };
 
+local Outfitter_CursorHadItem = nil;
+
 local Outfitter_cSlotDisplayNames =
 {
 	HeadSlot = HEADSLOT,
@@ -2897,7 +2899,94 @@ function Outfitter_OptimizeEquipmentChangeList(pEquipmentChangeList)
 	end
 end
 
+function Outfitter_ExtractItemLinkFromChatItemLink(message)
+  local _, _, _, vItemLink = string.find(message, "(|H(.+)|h)");
+  _, _, vItemLink = string.find(vItemLink, "(.-|h)");
+
+  return vItemLink;
+end
+
+function Outfitter_TradeWindowItemMatch(pItemLink, pMatchedTradeIndexes)
+	local vItemLink, vChatItemLink, vBsnumVItemLink, vBsnumPItemLink;
+
+	vBsnumPItemLink = string.gsub(pItemLink, ".-\124H([^\124]*)\124h.*", "%1")
+
+	for vTradeSlotIndex = 1, 7 do
+		if not pMatchedTradeIndexes[vTradeSlotIndex] then
+			Print(vTradeSlotIndex)
+			vChatItemLink = GetTradePlayerItemLink(vTradeSlotIndex);
+
+			if vChatItemLink then
+				vItemLink = Outfitter_ExtractItemLinkFromChatItemLink(vChatItemLink);
+				vBsnumVItemLink = string.gsub(vItemLink, ".-\124H([^\124]*)\124h.*", "%1")
+				
+				if GetItemInfo(vBsnumPItemLink) == GetItemInfo(vBsnumVItemLink) then
+
+					return vTradeSlotIndex;
+				end
+			end
+		end
+	end
+end
+
+function Outfitter_FindLockedItem()
+	local vNumBags, vFirstBagIndex = Outfitter_GetNumBags();
+	local vMatchedIndex, vLocations = 1, {};
+	
+	for vBagIndex = vFirstBagIndex, vNumBags do
+		local vNumBagSlots = GetContainerNumSlots(vBagIndex);
+		
+		if vNumBagSlots > 0 then
+			for vBagSlotIndex = 1, vNumBagSlots do
+				local vItemInfo = Outfitter_GetBagItemInfo(vBagIndex, vBagSlotIndex);
+
+				if vItemInfo and vItemInfo.Locked then
+					vLocations[vMatchedIndex] = {BagIndex = vBagIndex, BagSlotIndex = vBagSlotIndex};
+					vMatchedIndex = vMatchedIndex + 1;
+				end
+			end
+		end
+	end
+
+	return vLocations;
+end
+
+function Outfitter_FindUnlockedItem(pLocations)
+	for vLocationIndex, vLocation in ipairs(pLocations) do
+		local vItemInfo = Outfitter_GetBagItemInfo(vLocation.BagIndex, vLocation.BagSlotIndex);
+
+		if vItemInfo and not vItemInfo.Locked then
+
+			return vLocationIndex;
+		end
+	end
+end
+
+function Outfitter_CursorHasItemHandler()
+	local vLocations, vPickUpLocationIndex;
+
+	if Outfitter_CursorHadItem then
+		vPickUpLocationIndex = Outfitter_FindUnlockedItem(Outfitter_CursorHadItem.Locations);
+		Outfitter_PickupItemLocation(Outfitter_CursorHadItem.Locations[vPickUpLocationIndex]);
+		Outfitter_CursorHadItem = nil;
+
+	else
+		if CursorHasItem() then
+			vLocations = Outfitter_FindLockedItem();
+
+			if vLocations then
+				Outfitter_CursorHadItem = {};
+				Outfitter_CursorHadItem.Locations = vLocations;
+			end
+
+			ClearCursor();
+		end
+	end
+end
+
 function Outfitter_ExecuteEquipmentChangeList(pEquipmentChangeList, pEmptyBagSlots, pExpectedEquippableItems)
+	Outfitter_CursorHasItemHandler();
+
 	for vChangeIndex, vEquipmentChange in pEquipmentChangeList do
 		if vEquipmentChange.ItemLocation then
 			Outfitter_PickupItemLocation(vEquipmentChange.ItemLocation);
@@ -2933,9 +3022,13 @@ function Outfitter_ExecuteEquipmentChangeList(pEquipmentChangeList, pEmptyBagSlo
 			end
 		end
 	end
+
+	Outfitter_CursorHasItemHandler();
 end
 
 function Outfitter_ExecuteEquipmentChangeList2(pEquipmentChangeList, pEmptySlots, pBagsFullErrorFormat, pExpectedEquippableItems)
+	Outfitter_CursorHasItemHandler();
+
 	for vChangeIndex, vEquipmentChange in pEquipmentChangeList do
 		if vEquipmentChange.ToLocation then
 			Outfitter_PickupItemLocation(vEquipmentChange.FromLocation);
@@ -2964,6 +3057,8 @@ function Outfitter_ExecuteEquipmentChangeList2(pEquipmentChangeList, pEmptySlots
 			end
 		end
 	end
+
+	Outfitter_CursorHasItemHandler();
 end
 
 function Outfitter_OutfitHasCombatEquipmentSlots(pOutfit)
@@ -3209,8 +3304,8 @@ function Outfitter_GetBagItemInfo(pBagIndex, pSlotIndex)
 		return nil;
 	end
 	
-	vItemInfo.Texture, _, _, vItemInfo.Quality, _ = GetContainerItemInfo(pBagIndex, pSlotIndex);
-	
+	vItemInfo.Texture, _, vItemInfo.Locked, vItemInfo.Quality, _ = GetContainerItemInfo(pBagIndex, pSlotIndex);
+
 	return vItemInfo;
 end
 
@@ -3324,6 +3419,7 @@ function Outfitter_GetItemInfoFromLink(pItemLink)
 		Name = vItemName,
 		EnchantCode = vItemEnchantCode,
 		Level = vItemLevel,
+		ItemLink = vItemLink
 	};
 	
 	-- Just return if there's no inventory type
@@ -6112,7 +6208,9 @@ function Outfitter_WithdrawOutfit(pOutfit)
 	local	vEmptyBagSlots = Outfitter_GetEmptyBagSlotList();
 	
 	-- Execute the changes
-	
+	            if CursorHasItem() then
+                ClearCursor()
+            end
 	Outfitter_ExecuteEquipmentChangeList2(vEquipmentChangeList, vEmptyBagSlots, Outfitter_cWithdrawBagsFullError, vExpectedEquippableItems);
 end
 

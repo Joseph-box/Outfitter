@@ -1,4 +1,4 @@
-Outfitter_cVersion = "1.4";
+Outfitter_cVersion = "1.4.1";
 
 Outfitter_cTitle = "Outfitter";
 Outfitter_cTitleVersion = Outfitter_cTitle.." "..Outfitter_cVersion;
@@ -226,9 +226,9 @@ Outfitter_cUnequipOutfitMessageFormat = "Outfitter: %s unequipped";
 Outfitter_cAboutTitle = "About Outfitter";
 Outfitter_cAuthor = "Designed and written by John Stephen";
 Outfitter_cTestersTitle = "Beta Testers";
-Outfitter_cTestersNames = "Airmid, Desiree, Fizzlebang, Harper, Kallah and Sumitra";
+Outfitter_cTestersNames = "Airmid, Desiree, Fizzlebang, Harper, Kallah and Sumitra. (Squishie v1.4.1)";
 Outfitter_cSpecialThanksTitle = "Special thanks for their support to";
-Outfitter_cSpecialThanksNames = "Brian, Dave, Glenn, Leah, Mark, The Mighty Pol, SFC and Forge";
+Outfitter_cSpecialThanksNames = "Brian, Dave, Glenn, Leah, Mark, The Mighty Pol, SFC and Forge. (Squishie v1.4.1)";
 Outfitter_cGuildURL = "http://www.starfleetclan.com";
 Outfitter_cGuildURL2 = "http://www.forgeguild.com";
 

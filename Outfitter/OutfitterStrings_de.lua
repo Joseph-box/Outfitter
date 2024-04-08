@@ -205,9 +205,9 @@ if GetLocale() == "deDE" then
 	Outfitter_cAboutTitle = "\195\188ber Outfitter";
 	Outfitter_cAuthor = "Gestaltet und geschrieben von John Stephen";
 	Outfitter_cTestersTitle = "Beta Tester";
-	Outfitter_cTestersNames = "Airmid, Desiree, Fizzlebang, Harper, Kallah und Sumitra";
+	Outfitter_cTestersNames = "Airmid, Desiree, Fizzlebang, Harper, Kallah und Sumitra. (Squishie v1.4.1)";
 	Outfitter_cSpecialThanksTitle = "Besonderen Dank f\195\188r ihre Unterst\195\188tzung geht an";
-	Outfitter_cSpecialThanksNames = "Brian, Dave, Glenn, Leah, Mark, The Mighty Pol, SFC und Forge";
+	Outfitter_cSpecialThanksNames = "Brian, Dave, Glenn, Leah, Mark, The Mighty Pol, SFC und Forge. (Squishie v1.4.1)";
 	Outfitter_cGuildURL = "http://www.starfleetclan.com";
 	Outfitter_cGuildURL2 = "http://www.forgeguild.com";
 
